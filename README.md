@@ -1,66 +1,108 @@
-## Foundry
+# Decentralized Stablecoin (DSC)
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**[Developed following the cyfrin updraft course by Patrick Collins]**
 
-Foundry consists of:
+A minimal, over‑collateralized, algorithmic stablecoin system built with Foundry. DSC (“Decentralized Stable Coin”) is an ERC‑20 token pegged to the US dollar, backed exclusively by WETH and WBTC. It features:
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- **Exogenous Collateralization**: Users deposit WETH or WBTC as collateral.
+- **Algorithmic Minting/Burning**: Peg stability maintained via health‑factor checks.
+- **Over‑Collateralization**: Always ≥ 200% collateral coverage.
+- **No Governance, No Fees**: Simple, permissionless, on‑chain stability.
 
-## Documentation
+---
 
-https://book.getfoundry.sh/
+## Table of Contents
 
-## Usage
+- Architecture  
+- Getting Started  
+- Sepolia Deployment
+- Usage    
+- License  
 
-### Build
+---
 
-```shell
-$ forge build
+# Architecture
+
+## Contracts
+
+| Path                            | Description                                    |
+|---------------------------------|------------------------------------------------|
+| `src/DecentralizedStableCoin.sol` | ERC20 burnable stablecoin implementation.      |
+| `src/DSCEngine.sol`             | Protocol engine: collateral, minting, liquidation. |
+| `script/HelperConfig.s.sol`     | Network‑specific configuration & mocks.        |
+| `src/libraries/OracleLib.sol`   | Staleness‑checked wrapper for Chainlink feeds. |
+
+---
+
+## Scripts
+
+- **DeployDSC.s.sol** (`script/DeployDSC.s.sol`)  
+  Deploys `DecentralizedStableCoin` & `DSCEngine` in one broadcast.  
+  - Reads network config (Sepolia or Anvil) via `HelperConfig`.  
+  - Transfers DSC ownership to the engine.
+
+---
+
+## Testing
+
+```bash
+forge test --match-path test/unit
 ```
 
-### Test
+# Getting Started
 
-```shell
-$ forge test
+## Requirements
+
+- Rust (for Foundry)
+- Foundry
+
+## Installation
+
+1.	Install Foundry
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
 ```
 
-### Format
+2.	Clone this repo
 
-```shell
-$ forge fmt
+```bash
+git clone https://github.com/jeddiyoussefepfl/foundry-fund-me
+cd foundry-defi-stablecoin-f23
 ```
 
-### Gas Snapshots
+## Configuration
 
-```shell
-$ forge snapshot
+# Sepolia Deployment
+
+**NOT RECOMMENDED BUT OK FOR TESTING PURPOSES**
+
+Set PRIVATE_KEY env var to your deployer key for Sepolia:
+
+```bash
+export PRIVATE_KEY=<your_sepolia_key>
 ```
 
-### Anvil
+# Usage
 
-```shell
-$ anvil
+- Build 
+```bash
+forge build
+```
+- Test
+```bash
+forge test
 ```
 
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+- Deploy to Sepolia
+```bash
+forge script script/DeployDSC.s.sol:DeployDSC \
+  --rpc-url https://sepolia.infura.io/v3/<INFURA_KEY> \
+  --private-key $PRIVATE_KEY \
+  --broadcast
 ```
 
-### Cast
+## License
 
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+This project is licensed under the MIT License.
